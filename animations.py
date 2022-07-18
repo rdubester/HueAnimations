@@ -2,6 +2,7 @@ import threading
 from time import sleep
 import logging
 from collections import defaultdict
+from typing import List
 from util import *
 
 class AnimationManager:
@@ -62,7 +63,6 @@ class Animation:
 
     counter = defaultdict(int)
 
-
     def __init__(self, lights, duration=None, loop = None, name=None):
         self.lights = as_list(lights)
         self.duration = duration
@@ -121,7 +121,7 @@ class Animation:
 
 # a list of animations that play concurrently
 class AGroup(Animation):
-    def __init__(self, *animations, sequence=False, stagger = 0, **kwargs):
+    def __init__(self, *animations: Animation, sequence=False, stagger = 0, **kwargs):
         self.animations = animations
         lights = set()
         for animation in animations:
@@ -136,38 +136,19 @@ class AGroup(Animation):
             animation.stop()
         super().stop()
 
-    def animate_sequence(self):
-        for animation in self.animations:
-            if self.anim_thread.running:
-                animation.play(None, blocking=False, silent=self.silent)
-                if self.sequence:
-                    sleep(animation.runtime)
-                else:
-                    sleep(self.stagger)
-                # print("SEQUENCE", self.runtime, self. duration, animation.runtime, animation.duration)
-
-    def animate_parallel(self):
-        for animation in self.animations:
-            if self.anim_thread.running:
-                animation.play(self.duration, blocking=False, silent=self.silent)
-                # print("PARALLEL", self.runtime, self. duration, animation.runtime, animation.duration)
-                if self.sequence:
-                    sleep(animation.runtime)
-                else:
-                    sleep(self.stagger)
-        sleep(self.duration)
-
     def animate(self):
         self.silent or print(f"{self}: animating {[str(a) for a in self.animations]}, {self.sequence=}")
-        if self.sequence:
-            self.animate_sequence()
-        else:
-            self.animate_parallel()
+        for animation in self.animations:
+            if self.anim_thread.running:
+                delay   = animation.duration if self.sequence else self.stagger
+                runtime = animation.duration if self.sequence else self.duration
+                animation.play(runtime, blocking=False, silent=self.silent)
+                sleep(delay)
+        if not self.sequence:
+            sleep(self.duration)
         for animation in self.animations:
             animation.stop()
-        # for thread in [animation.thread for animation in self.animations]:
-        #     thread.join()
-
+        
     def set_timing(self, runtime):
         if runtime is None:
             if any([animation.duration is None for animation in self.animations]):

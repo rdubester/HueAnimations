@@ -28,16 +28,6 @@ def wave(lights, runtime, colors, frequency, shape=None, wait = None):
     g = AGroup(*anims, sequence=False, stagger = wait, loop=True)
     g.play(runtime=runtime, loop=True, blocking=False)
     return g
-    #     )
-    # groups = []
-    # for light in lights:
-    #     g = AGroup(
-    #         *[Fade(light, color, duration = interval * weight) for color, weight in zip(colors, weights)],
-    #         stagger=wait
-    #     ).play(runtime = runtime, sequence = True, loop=True, blocking=False)
-    #     groups.append(g)
-    #     # sleep(wait)
-    # return groups
 
 groups = globals().get('groups', [])
 for group in groups:
@@ -64,7 +54,8 @@ colors = [
 shape = [1.8,6,3.8, 2.4]
 frequency = 8
 # wait = 0.15
-wait = 0.5
+wait = 1
+
 # wait = golden = (1 + 5 ** 0.5) / 2
 frequency = 6
 
