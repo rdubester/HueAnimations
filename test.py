@@ -102,3 +102,15 @@ for i in range (len(test)):
             best_flip = (i,j)
         #print(i, j, adj_components, adj_sizes[:2])
 print(best, best_flip)
+
+
+# bcab
+# ideally we want to skip the b for now, because it occurs later in the string and isn't the lowest letter
+# but if we skip then we have to take c next as it is solo
+# so the result is cab
+# which is worse than bca, which is what we get by taking the b first
+
+# consider the b
+
+# remdup(str) = str[0] + remdup(str[1:]) | remdup(str[1:]
+# remdup([]) = []

@@ -29,19 +29,19 @@ colors = [
 # group.play(runtime=300000)
 
 
-# colors = [Color(c, brightness=254) for c in [TEAL, BLUE, VIOLET]]
+# co/xlors = [Color(c, brightness=254) for c in [TEAL, BLUE, VIOLET]]
 # colors = [Color(c, brightness=254) for c in [ORANGE, TEAL, BLUE]]
 colors = [Color(c, brightness=254) for c in [BLUE, VIOLET, BLUE]]
 shape = [2,3,4]
-colors = [ 
-    Color((BLUE+VIOLET) / 2, brightness=120),
-    Color(BLUE, brightness=150),
-    Color((BLUE + TEAL) / 2, brightness=120),
-    Color(BLUE, brightness=150)]
+# colors = [ 
+#     Color((BLUE+VIOLET) / 2, brightness=120),
+#     Color(BLUE, brightness=150),
+#     Color((BLUE + TEAL) / 2, brightness=120),
+#     Color(BLUE, brightness=150)]
     #   Color(ORANGE, brightness=160),
           
-shape = [1,1,1,1]
-frequency = 20
+shape = [1,1,1]
+frequency = 10
 wave = Wave(bedroom_lights, colors, frequency, shape, alpha=0.2)
 wave.play(runtime=300000, blocking=False)
 
