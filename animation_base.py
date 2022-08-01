@@ -33,12 +33,13 @@ class Animation():
     def __str__(self):
         return self.name
 
-    def animate(self, lights, duration = None, silent = True):
+    def animate(self, lights, duration = None, speed = 1, silent = True):
         if not isinstance(lights, list):
             lights = [lights]
         self.duration = self.duration or duration
         if not self.duration:
             raise Exception(f"{self.name}: duration not be set")
+        self.duration *= speed
         self.lights = lights
         self.silent = silent and self.silent
         self.running = True
@@ -72,12 +73,4 @@ class Animation():
         hsb = set_brightness(hsb, hsb.brightness * Animation.global_brightness)
         cmd = {"on": True, "hsb": hsb, "transitiontime": int(time * 10)}
         Animation.bridge.set_light(lights, cmd)
-        self.wait(self.duration)
-
-class Wait(Animation):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-    
-    def animate(self, lights, **kwargs):
-        super().animate(lights, **kwargs)
         self.wait(self.duration)
