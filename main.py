@@ -1,91 +1,76 @@
-import math
-import numpy as np
+from multiprocessing.dummy import Pool
 from setup import *
 from colors import *
-import threading
+from refactor2 import *
 
-lights = [round_light, table_light, square_light]
-runtime = 300000
-c1 =  RED * (1 - 0.6) + ORANGE * 0.6
-c2 = RED
-c3 = VIOLET  * (1 - 0.9) + MAX_HUE * 0.9
-print(c1, c2, c3)
-colors = [
-    Color(c1, saturation=254, brightness=200),
-    Color(c1 * 0.8, saturation=254, brightness=200),
-    Color(c2, brightness = 160),
-    Color(c3, brightness = 160)]
+Animation.bridge = bridge
 
-# frequency = 8
-# shape = [1.8,6,3.8, 2.4]
-# wait = 2
-# group = Wave(lights, colors, frequency, shape)
-# group.play(runtime=300000)
+# for light, color in zip(lights, [red, green, blue]):
+#     Loop(
+#         FadeFromTo(yellow, color, duration=3), max_iters=10
+#     ).threaded(light)
 
-# colors = [green, teal, blue, violet, red]
-# frequency = 8
-# shape = [2,1,1,1,1]
-# group = Wave(colors, frequency, shape, bedroom_lights, stagger=None)
-# group.play(runtime=300000)
+# def firework(color):
+#     return Sequence([
+#         FadeFromTo(white, color, ratio = 0.2, duration=1),
+#         Fade(Color(color.hue, brightness=0), duration = 4)], name = f"firework: {color}")
+# fireworks = [firework(color) for color in rainbow]
+# fireworkPool = RandomPool(fireworks, name = "fireworkPool")
+# fill = Wait(duration=3)
+# pool = RandomPool([fireworkPool, fill], weights=[1, 5])
+# Distribute(Loop(pool)).animate(lights, duration=100)
 
+def lavalamp(duration):
+    speed = 2
 
-# co/xlors = [Color(c, brightness=254) for c in [TEAL, BLUE, VIOLET]]
-# colors = [Color(c, brightness=254) for c in [ORANGE, TEAL, BLUE]]
-colors = [Color(c, brightness=254) for c in [BLUE, VIOLET, BLUE]]
-shape = [2,3,4]
-# colors = [ 
-#     Color((BLUE+VIOLET) / 2, brightness=120),
-#     Color(BLUE, brightness=150),
-#     Color((BLUE + TEAL) / 2, brightness=120),
-#     Color(BLUE, brightness=150)]
-    #   Color(ORANGE, brightness=160),
-          
-shape = [1,1,1]
-frequency = 10
-wave = Wave(bedroom_lights, colors, frequency, shape, alpha=0.2)
-wave.play(runtime=300000, blocking=False)
+    bgs = RandomPool(
+        [FadeFromTo(set_brightness(red, 60), set_brightness(red, 100), ratio = r, duration = speed * d)
+            for r in [0.2, 0.4, 0.6, 0.8, 1]
+            for d in [1, 2, 3, 4, 5]])
 
-# while(True):
-#     print("Active Threads: ", threading.active_count())
-#     for thread in threading.enumerate():
-#         print(thread.name)
-#     sleep(5)
+    redShades = [set_brightness(red, int(254 * 1 / i)) for i in range(3, 6)]
+    orangeShades = [set_brightness(orange, int(254 * 1 / i)) for i in range(3, 6)]
+    purpleShades = [set_brightness(violet, int(254 * 1 / i)) for i in range(3, 6)]
+    shades = redShades + orangeShades + purpleShades
 
+    lavas = RandomPool([FadeFromTo(c1, c2, ratio = r, duration = speed * d) 
+        for c1 in shades 
+        for c2 in shades 
+        for r in [0.2, 0.4, 0.6, 0.8]
+        for d in range(1, 6)])
 
-# anim = Parallel(
-#     [Stochastic([Fade(light, color, loop=False, duration=0.5) for color in rainbow], mean=2, sd=1)
-#     for light in lights], loop=False)
-# flicker = Flicker(lights, rainbow, 0.8, 3)
-# flicker.play(runtime=300000, blocking=False)
+    anim = RandomPool([lavas, bgs], weights=[5, 5])
+    Distribute(Loop(anim)).animate(test_group, duration=duration)
 
-# def StochasticPool(func, lights, mean, sd, **kwargs):
-#     animations = []
-#     for light in lights:
-#         s = Stochastic(func(light), mean, sd, **kwargs)
-#         animations.append(s)
-#     return Parallel(animations, loop=False)
+def dancing():
+    Animation.global_brightness = 0.7
+    dur = 20
+    while True:
+        n = random.randint(0, 6)
+        match n:
+            case 0: lavalamp(dur)
+            #case 1: swirl(rainbow, 30, dur)
+            #case 2: swirl([green, teal, blue], 20, dur)
+            case 2: swirl([orange, red, violet], 20, dur)
+            case 3: swirl([orange, red, violet], 20, dur)
+            case 4: Fade(red).animate(test_group, duration=dur/2)
+            case 1: Fade(red).animate(test_group, duration=dur/2)
+            case 5: Fade(orange).animate(test_group, duration=dur/2)
+            case 6: Fade(violet).animate(test_group, duration=dur/2)
+            ##case 7: Fade(green).animate(test_group, duration=dur/2)
+            # case 8: Fade(teal).animate(test_group, duration=dur/2)
+            # case 9: Fade(blue).animate(test_group, duration=dur/2)
 
-# def firework_(colors, duration, initial_speed, steps):
-#     def inner(lights):
-#         return [Firework(lights, color, duration, initial_speed, steps) for color in colors]
-#     return inner
+# swirl(rainbow, 10, 2000)   
 
-# def distribute(func, lights, **kwargs):
-#     animations = []
-#     for light in lights:
-#         animations.append(func(light, **kwargs))
-#     return Parallel(animations, **kwargs)
-
-# def fireworks(colors, duration, initial_speed, steps):
-#     def inner(light):
-#         return [Firework(light, color, duration, initial_speed, steps) for color in colors]
-#     return inner
-
-
-# fireworks = [Firework(light, c, 8, initial_speed=0.4) for light in lights for c in rainbow]
-# anim = StochasticPool(thunk(Firework, ), lights, mean=2, sd=1)
-# anim = Parallel(fireworks, lights, mean=2, sd=1)
-# anim.play(runtime=300000, blocking=False)
-
-# anim = Stochastic(fireworks, mean=3, sd=1)
-# anim.play(runtime=300000, blocking=False)
+def swirl(lights, colors, freq, duration):
+    fades = [Fade(color, duration=freq/len(colors)) for color in  colors]
+    anims = []
+    for i in range(len(colors)):
+        rotated = fades[-i:] + fades[:-i]
+        seq = Sequence(rotated, name=f"swirl: {i}")
+        anims.append(seq)
+    Loop(Map(anims)).animate(lights, duration=duration, silent=False)
+   
+Animation.global_brightness = 0.5
+swirl([tri_lamp, round_lamp, small_lamp, square_lamp], [red, violet, blue, blue], 6, 2000)
