@@ -10,3 +10,6 @@ def flatten(lst):
 def normalize(vals: list[float]):
     total = sum(vals)
     return [v / total for v in vals]
+
+def strvals(vals: list):
+    return ", ".join(str(v) for v in vals)

@@ -1,7 +1,6 @@
-from multiprocessing.dummy import Pool
 from setup import *
 from colors import *
-from refactor2 import *
+from animations import *
 
 Animation.bridge = bridge
 
