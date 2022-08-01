@@ -4,6 +4,7 @@ import itertools
 import random
 from threading import Thread, Timer
 from time import sleep, time
+from typing import List
 from colors import *
 from phue import Light
 
@@ -178,6 +179,23 @@ class RandomPool(Animation):
         animation = random.choices(self.animations, weights=self.weights)[0]
         animation.animate(lights, **kwargs)
 
+class Map(Animation):
+    def __init__(self, animations: list[Animation], delay: float = 0, **kwargs):
+        super().__init__(**kwargs)
+        self.animations = animations
+        self.delay = delay
+    
+    def animate(self, lights, **kwargs):
+        super().animate(lights, **kwargs)
+        self.silent or print(f"{self}: {self.animations}")
+        self.threads = []
+        for anim, light in zip(self.animations, lights):
+            self.threads.append(anim.threaded([light], **kwargs))
+            self.wait(self.delay)
+        for thread in self.threads:
+            thread.join()
+
+# Todo: replace with map . replicate?
 class Distribute(Animation):
     def __init__(self, animation: Animation, delay: float = 0, **kwargs):
         super().__init__(**kwargs)

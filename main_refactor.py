@@ -64,14 +64,13 @@ def dancing():
 # swirl(rainbow, 10, 2000)   
 
 def swirl(lights, colors, freq, duration):
-    cycle = Sequence([Fade(color, duration=freq/len(colors)) for color in  colors])
-    for idx, light in enumerate(lights):
-        delay = idx * freq / len(lights)
-        seq = Sequence([
-            Wait(delay),
-            Loop(Strict(cycle, duration=freq))])
-        seq.threaded(light, duration=duration, silent=False)
-        # cycle = Sequence([Fade(color, duration=freq/len(colors)) for color in  colors])
-        # Distribute(Loop(cycle), delay = freq/len(lights)).animate(lights, duration=duration)
+    fades = [Fade(color, duration=freq/len(colors)) for color in  colors]
+    anims = []
+    for i in range(len(colors)):
+        rotated = fades[-i:] + fades[:-i]
+        seq = Sequence(rotated, name=f"swirl: {i}")
+        anims.append(seq)
+    Loop(Map(anims)).animate(lights, duration=duration, silent=False)
    
-swirl([tri_lamp, round_lamp, small_lamp, square_lamp], [red, orange, blue, green], 4, 2000)
+Animation.global_brightness = 0.5
+swirl([tri_lamp, round_lamp, small_lamp, square_lamp], [red, violet, blue, blue], 6, 2000)
