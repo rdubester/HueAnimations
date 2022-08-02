@@ -33,13 +33,12 @@ class Animation():
     def __str__(self):
         return self.name
 
-    def animate(self, lights, duration = None, speed = 1, silent = True):
+    def animate(self, lights, duration = None, silent = True):
         if not isinstance(lights, list):
             lights = [lights]
         self.duration = self.duration or duration
         if not self.duration:
             raise Exception(f"{self.name}: duration not be set")
-        self.duration *= speed
         self.lights = lights
         self.silent = silent and self.silent
         self.running = True
@@ -58,7 +57,7 @@ class Animation():
         thread.start()
         return thread
 
-    def wait(self, time: float, steps: int = 100):
+    def wait(self, time: float, steps: int = 1000):
         for _ in range(steps):
             if not self.running:
                 return

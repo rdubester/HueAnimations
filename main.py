@@ -60,16 +60,24 @@ def dancing():
             # case 8: Fade(teal).animate(test_group, duration=dur/2)
             # case 9: Fade(blue).animate(test_group, duration=dur/2)
 
-# swirl(rainbow, 10, 2000)   
+# swirl(rainbow, 10, 2000)
 
-def swirl(lights, colors, freq, duration):
-    fades = [Fade(color, duration=freq/len(colors)) for color in  colors]
-    anims = []
-    for i in range(len(colors)):
-        rotated = fades[-i:] + fades[:-i]
-        seq = Sequence(rotated, name=f"swirl: {i}")
-        anims.append(seq)
-    Loop(Map(anims)).animate(lights, duration=duration, silent=False)
-   
-Animation.global_brightness = 0.5
-swirl([tri_lamp, round_lamp, small_lamp, square_lamp], [red, violet, blue, blue], 6, 2000)
+def swirl1():
+    Animation.global_brightness = 1
+    lamps = [tri_lamp, round_lamp, small_lamp, square_lamp]
+    colors = [red, violet, blue, green]
+    shape = [1,2,3,4]
+    Swirl(colors, freq=8, weights=shape).animate(lamps, duration=2000)
+
+def swirl2():
+    Animation.global_brightness = 1
+    lamps = [tri_lamp, round_lamp, small_lamp, square_lamp]
+    colors = [blue, violet, red,  violet]
+    shape = [3,2,1,1]
+    Swirl(colors, freq=8, weights=shape).animate(lamps, duration=2000)
+
+import cProfile
+# Fade(orange).animate(test_group, duration=10)
+cProfile.run('MultiFade(rainbow).animate(test_group, duration = 4)', sort='tottime')
+Fade(orange).animate(test_group, duration=10)
+ 

@@ -72,17 +72,32 @@ class Loop(Animation):
     def log(self):
         super().log(f"{self.animation}, {self.max_iters=}")
 
-
-class Sequence(Animation):
-    def __init__(self, animations: list[Animation], **kwargs):
+class ShapedSequence(Animation):
+    def __init__(self, animations: list[Animation], weights: list[float] = None, rotation=0, **kwargs):
         super().__init__(**kwargs)
         self.animations = animations
-
+        if self.duration is None and all(a.duration is not None for a in animations):
+            self.duration = sum(a.duration for a in animations)
+        self.weights = normalize(weights or [1] * len(animations))
+        if len(self.weights) != len(animations):
+            raise ValueError(f"{self}: animations and weights must be the same length")
+        self.rotate(rotation)
+    
     def animate(self, lights, **kwargs):
         super().animate(lights, **kwargs)
-        for animation in self.animations:
+        for animation, weight in zip(self.animations, self.weights):
+            kwargs['duration'] = self.duration * weight
             animation.animate(lights, **kwargs)
 
+    def log(self):
+        super().log(f'{strvals(self.animations)}, {self.weights}')
+
+    def rotate(self, n: int):
+        self.animations = self.animations[n:] + self.animations[:n]
+        self.weights = self.weights[n:] + self.weights[:n]
+
+
+class Sequence(ShapedSequence):
     def log(self):
         super().log(strvals(self.animations))
 
@@ -134,53 +149,35 @@ class Distribute(Map):
 
 
 class Swirl(Animation):
-    def __init__(self, colors: list[Color], freq: float, max_iters = None, **kwargs):
+    def __init__(self, colors: list[Color], freq: float, max_iters = None, weights=None, **kwargs):
         super().__init__(**kwargs)
         self.colors = colors
         self.freq = freq
         self.max_iters = max_iters
+        self.weights = weights
 
     def animate(self, lights, **kwargs):
         num_colors = len(self.colors)
-        fade_duration = self.freq / num_colors
-        fades = [Fade(color, duration=fade_duration) for color in self.colors]
         anims = []
         for i in range(num_colors):
-            rotated = fades[-i:] + fades[:-i]
-            anims.append(Sequence(rotated, name=f"swirl: {i}"))
+            fades = [Fade(color) for color in self.colors]
+            seq = ShapedSequence(fades, self.weights, duration = self.freq, rotation=-i)
+            anims.append(seq)
         Loop(Map(anims), self.max_iters).animate(lights, **kwargs)
 
     def log(self):
         super().log(f"{strvals(self.colors)}, {self.freq=}")
 
 
-class ShapedSequence(Animation):
-    def __init__(self, animations: list[Animation], weights: list[float] = None, **kwargs):
-        super().__init__(animations, **kwargs)
-        self.weights = normalize(weights or [1] * len(animations))
-        if len(self.weights) != len(animations):
-            raise ValueError(f"{self}: animations and weights must be the same length")
-    
-    def animate(self, lights, **kwargs):
-        super().animate(lights, **kwargs)
-        for animation, weight in zip(self.animations, self.weights):
-            animation.animate(lights, speed = weight, **kwargs)
-
-    def log(self):
-        super().log(strvals(self.animations))
-
-class ShapedFade(Animation):
-    def __init__(self, colors: list[Color], weights: list[float], **kwargs):
+class MultiFade(Animation):
+    def __init__(self, colors: list[Color], weights: list[float] = None, **kwargs):
         super().__init__(**kwargs)
         self.colors = colors
-        self.weights = normalize(weights or [1] * len(colors))
-        if len(self.weights) != len(self.colors):
-            raise ValueError(f"{self}: weights must be the same length as colors")
+        self.weights = weights
+        self.fades = [Fade(color) for color in colors]
+        self.animation = ShapedSequence(self.fades, self.weights)
     
     def animate(self, lights, **kwargs):
         super().animate(lights, **kwargs)
-        fades = []
-        for color, weight in zip(self.colors, self.weights):
-            fades.append(Fade(color, self.duration * weight))
-        Sequence(fades).animate(lights, **kwargs)
+        self.animation.animate(lights, **kwargs)
         
