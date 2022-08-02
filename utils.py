@@ -13,3 +13,10 @@ def normalize(vals: list[float]):
 
 def strvals(vals: list):
     return ", ".join(str(v) for v in vals)
+
+import time
+def sleep_precise(duration, get_now=time.perf_counter):
+    now = get_now()
+    end = now + duration
+    while now < end:
+        now = get_now()

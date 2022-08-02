@@ -1,8 +1,7 @@
 from setup import *
 from colors import *
 from animations import *
-
-Animation.bridge = bridge
+import cProfile
 
 # for light, color in zip(lights, [red, green, blue]):
 #     Loop(
@@ -64,20 +63,29 @@ def dancing():
 
 def swirl1():
     Animation.global_brightness = 1
-    lamps = [tri_lamp, round_lamp, small_lamp, square_lamp]
+    lamps = [tri_top, round_lamp, small_lamp, square_lamp]
     colors = [red, violet, blue, green]
-    shape = [1,2,3,4]
+    # shape = [1,2,3,4]
+    shape = None
     Swirl(colors, freq=8, weights=shape).animate(lamps, duration=2000)
 
 def swirl2():
     Animation.global_brightness = 1
-    lamps = [tri_lamp, round_lamp, small_lamp, square_lamp]
     colors = [blue, violet, red,  violet]
     shape = [3,2,1,1]
-    Swirl(colors, freq=8, weights=shape).animate(lamps, duration=2000)
+    return Swirl(colors, freq=4, weights=shape)
 
-import cProfile
+# swirl2()
 # Fade(orange).animate(test_group, duration=10)
-cProfile.run('MultiFade(rainbow).animate(test_group, duration = 4)', sort='tottime')
-Fade(orange).animate(test_group, duration=10)
- 
+# cProfile.run('MultiFade(rainbow).animate(test_group, duration = 4)', sort='tottime')
+# s = swirl2()
+# lamps = [tri_lamp, round_lamp, small_lamp, square_lamp]
+# cProfile.run('s.animate(lamps, duration=10)', sort='tottime')
+swirl1()
+
+# f = Fade(orange)
+# # start = time()
+# cProfile.run('f.animate(test_group, duration=3)')
+# print(time() - start)
+
+updateManager.stop()

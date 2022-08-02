@@ -1,4 +1,5 @@
-from ctypes import Union
+from time import sleep
+from typing import Union
 from threading import Thread
 from phue import Bridge, Light
 from colors import Color
@@ -24,6 +25,7 @@ class LightUpdateManager:
     def __init__(self, bridge):
         self.__updates: list[LightUpdate] = []
         self.__bridge: Bridge = bridge
+        self.__running = True
         self.__thread: Thread = Thread(target=self.process_requests)
         self.__thread.start()
 
@@ -31,6 +33,12 @@ class LightUpdateManager:
         self.__updates.append(update)
 
     def process_requests(self):
-        while self.__updates:
-            update = self.__updates.pop(0)
-            self.__bridge.set_light(update.lights, update.get_cmd())
+        while self.__running:
+            if self.__updates:
+                update = self.__updates.pop(0)
+                self.__bridge.set_light(update.lights, update.get_cmd())
+            sleep(0.2)
+    
+    def stop(self):
+        self.__running = False
+        self.__thread.join()

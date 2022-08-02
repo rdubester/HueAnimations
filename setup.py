@@ -1,9 +1,12 @@
 # from animations import *
 from phue import Bridge
+from UpdateManager import LightUpdateManager
+from animation_base import Animation
 
-BEDROOM_LEFT_RIGHT = [3, 1, 2]
-LIVINGROOM_LEFT_RIGHT = [3, 1, 2]
 bridge = Bridge('10.0.0.51')
+updateManager = LightUpdateManager(bridge)
+Animation.updateManager = updateManager
+
 all_lights = bridge.get_light_objects('id')
 for key, value in all_lights.items():
     print(key, value.name)

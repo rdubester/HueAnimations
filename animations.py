@@ -1,6 +1,4 @@
 from copy import deepcopy
-from re import M
-from time import time
 import random
 
 from animation_base import Animation
@@ -62,11 +60,11 @@ class Loop(Animation):
     def animate(self, lights, **kwargs):
         super().animate(lights, **kwargs)
         iters = 0
-        starttime = time()
+        starttime = time.time()
         while not (self.max_iters and iters >= self.max_iters):
             self.animation.animate(lights, **kwargs)
             iters += 1
-            if time() - starttime > self.duration:
+            if time.time() - starttime > self.duration:
                 break
 
     def log(self):
@@ -128,6 +126,7 @@ class Map(Animation):
     def animate(self, lights, **kwargs):
         super().animate(lights, **kwargs)
         self.threads = []
+        # maybe swap out for threadpool?
         for anim, light in zip(self.animations, lights):
             self.threads.append(anim.threaded([light], **kwargs))
             self.wait(self.delay)
